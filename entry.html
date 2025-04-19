@@ -1,45 +1,31 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Wallet Closing Entry - e-Sevai</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 20px auto; }
-    input, select, textarea { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
-    button { padding: 10px; background: darkblue; color: white; width: 100%; }
-  </style>
-</head>
+<head><title>Wallet Entry</title></head>
 <body>
+  <div style="text-align:right;"><button onclick="logout()">Logout</button></div>
   <h2 id="welcome">Wallet Closing Entry</h2>
   <form id="entryForm">
-    <label>Date:</label>
-    <input type="date" id="date" required />
-
-    <label>Wallet Name:</label>
+    <label>Date:</label><input type="date" id="date" required /><br>
+    <label>Wallet:</label>
     <select id="wallet" required>
-      <option value="">Select Wallet</option>
+      <option value="">Select</option>
       <option value="BOB SATHYA">BOB SATHYA</option>
       <option value="HDFC MURUGESAN">HDFC MURUGESAN</option>
       <option value="SBI">SBI</option>
       <option value="SURIYA GPAY">SURIYA GPAY</option>
       <option value="CSC MURUGESAN">CSC MURUGESAN</option>
-    </select>
-
-    <label>Closing Balance:</label>
-    <input type="number" id="closing" placeholder="Enter closing balance" required />
-
-    <label>Note (optional):</label>
-    <textarea id="note" placeholder="Enter note if any"></textarea>
-
+    </select><br>
+    <label>Closing:</label><input type="number" id="closing" required /><br>
+    <label>Note:</label><textarea id="note"></textarea><br>
     <button type="submit">Submit</button>
   </form>
-
   <script>
-    const user = JSON.parse(sessionStorage.getItem('user')) || { username: "001", role: "staff" };
-    let displayName = sessionStorage.getItem('displayName') || "Logu";
-    sessionStorage.setItem('user', JSON.stringify(user));
-    sessionStorage.setItem('displayName', displayName);
-    document.getElementById('welcome').innerText = "Welcome, " + displayName;
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user || user.role !== "staff") {
+      alert("Access denied. Please login as staff.");
+      window.location.href = "login.html";
+    }
+    document.getElementById("welcome").innerText = "Welcome, " + sessionStorage.getItem("displayName");
 
     const form = document.getElementById('entryForm');
     form.addEventListener('submit', e => {
@@ -47,23 +33,34 @@
       const data = {
         date: document.getElementById('date').value,
         userCode: user.username,
-        staffName: displayName,
+        staffName: sessionStorage.getItem("displayName"),
         wallet: document.getElementById('wallet').value,
         closing: document.getElementById('closing').value,
         note: document.getElementById('note').value
       };
-
       fetch('https://script.google.com/macros/s/AKfycbxFlDGzVHVzJkxEdi7KOPR5wCESImWTTCNhGflsT7KkHr_T2RhT0FeP51OK_B3zjiU/exec', {
         method: 'POST',
         body: new URLSearchParams(data)
       })
-      .then(res => res.text())
+      .then(res => res.json())
       .then(resp => {
-        alert("Closing balance submitted successfully!");
-        form.reset();
+        if (resp.status === "ok") {
+          alert("✅ Saved!");
+          form.reset();
+        } else {
+          alert("⚠️ " + resp.message);
+        }
       })
-      .catch(error => alert("Submission failed. Please try again."));
+      .catch(error => alert("❌ Submission failed."));
     });
   </script>
+  
+<script>
+function logout() {
+  sessionStorage.clear();
+  window.location.href = "login.html";
+}
+</script>
+
 </body>
 </html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Login</title></head>
+<body>
+  <h2>e-Sevai Login</h2>
+  <form onsubmit="event.preventDefault(); login();">
+    <input type="text" id="code" placeholder="User Code (e.g. 001 or Murugesan)" required><br>
+    <input type="password" id="pass" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+  </form>
+  <script>
+    function login() {
+      const c = document.getElementById("code").value;
+      const p = document.getElementById("pass").value;
+      if (c === "Murugesan" && p === "Muru@2025") {
+        sessionStorage.setItem("user", JSON.stringify({username: "MD", role: "boss"}));
+        sessionStorage.setItem("displayName", "Murugesan");
+        window.location.href = "dashboard.html";
+      } else if (c >= "001" && c <= "010" && p === c) {
+        sessionStorage.setItem("user", JSON.stringify({username: c, role: "staff"}));
+        sessionStorage.setItem("displayName", "Staff " + c);
+        window.location.href = "entry.html";
+      } else {
+        alert("Invalid credentials");
+      }
+    }
+  </script>
+</body>
+</html>

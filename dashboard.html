@@ -1,54 +1,178 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>Boss Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      padding: 30px;
       margin: 0;
-      padding: 20px;
     }
-    .top-bar {
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 15px;
+    }
+    h2 {
+      margin: 0;
     }
     button {
-      padding: 8px 16px;
-      background-color: #d9534f;
-      border: none;
+      background: #007bff;
       color: white;
-      border-radius: 4px;
+      border: none;
+      padding: 8px 16px;
       cursor: pointer;
+      border-radius: 4px;
+      margin-left: 5px;
     }
-    iframe {
-      width: 100%;
-      height: 600px;
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    input {
+      padding: 6px;
       border: 1px solid #ccc;
-      margin-top: 20px;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #343a40;
+      color: white;
+    }
+    #summary {
+      margin: 10px 0;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
+  <div class="header">
     <h2>Boss Dashboard</h2>
-    <button onclick="logout()">Logout</button>
+    <div>
+      <button onclick="refreshData()">🔁 Refresh</button>
+      <button onclick="logout()">Logout</button>
+    </div>
   </div>
+  <div class="filters">
+    <input type="date" id="fromDate">
+    <input type="date" id="toDate">
+    <input type="text" id="walletFilter" placeholder="Filter by Wallet">
+    <input type="text" id="staffFilter" placeholder="Filter by Staff">
+    <button onclick="applyFilters()">Search</button>
+    <button onclick="exportExcel()">Export Excel</button>
+    <button onclick="exportPDF()">Export PDF</button>
+  </div>
+  <div id="summary"></div>
+  <table id="entryTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Wallet</th>
+        <th>Closing</th>
+        <th>Note</th>
+        <th>User Code</th>
+        <th>Staff Name</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+    </tbody>
+  </table>
 
-  <script>
-    const user = JSON.parse(sessionStorage.getItem('user'));
-    if (!user || user.role !== "boss") {
-      alert("Access denied. Boss only.");
-      window.location.href = "login.html";
-    }
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = "login.html";
-    }
-  </script>
+<script>
+const user = JSON.parse(sessionStorage.getItem('user'));
+if (!user || user.role !== "boss") {
+  alert("Access denied. Boss only.");
+  window.location.href = "login.html";
+}
 
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pubhtml?widget=true&amp;headers=false"></iframe>
+let sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pub?output=csv";
+
+function logout() {
+  sessionStorage.removeItem("user");
+  window.location.href = "login.html";
+}
+
+function fetchData() {
+  fetch(sheetURL + '&cache=' + new Date().getTime())
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.trim().split("\n").map(r => r.split(","));
+      window.rawData = rows.slice(1); // skip header
+      renderTable(window.rawData);
+    });
+}
+
+function refreshData() {
+  fetchData();
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+  let total = 0;
+  data.forEach(r => {
+    const tr = document.createElement("tr");
+    r.forEach(col => {
+      const td = document.createElement("td");
+      td.textContent = col;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+    total += Number(r[2]) || 0;
+  });
+  document.getElementById("summary").textContent = "Total Closing: ₹" + total;
+}
+
+function applyFilters() {
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
+  const wallet = document.getElementById("walletFilter").value.toLowerCase();
+  const staff = document.getElementById("staffFilter").value.toLowerCase();
+
+  const filtered = window.rawData.filter(r => {
+    const rDate = r[0];
+    const rWallet = r[1].toLowerCase();
+    const rStaff = r[5].toLowerCase();
+    return (!from || rDate >= from) &&
+           (!to || rDate <= to) &&
+           rWallet.includes(wallet) &&
+           rStaff.includes(staff);
+  });
+  renderTable(filtered);
+}
+
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(document.getElementById("entryTable"));
+  XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+  XLSX.writeFile(wb, "dashboard.xlsx");
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.autoTable({ html: '#entryTable' });
+  doc.save("dashboard.pdf");
+}
+
+fetchData();
+</script>
 </body>
 </html>

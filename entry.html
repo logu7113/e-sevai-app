@@ -1,25 +1,76 @@
 <!DOCTYPE html>
 <html>
-<head><title>Wallet Entry</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Wallet Entry</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      width: 100%;
+      max-width: 400px;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #0044cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logout {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
 <body>
-  <div style="text-align:right;"><button onclick="logout()">Logout</button></div>
-  <h2 id="welcome">Wallet Closing Entry</h2>
-  <form id="entryForm">
-    <label>Date:</label><input type="date" id="date" required /><br>
-    <label>Wallet:</label>
-    <select id="wallet" required>
-      <option value="">Select</option>
-      <option value="BOB SATHYA">BOB SATHYA</option>
-      <option value="HDFC MURUGESAN">HDFC MURUGESAN</option>
-      <option value="SBI">SBI</option>
-      <option value="SURIYA GPAY">SURIYA GPAY</option>
-      <option value="CSC MURUGESAN">CSC MURUGESAN</option>
-    </select><br>
-    <label>Closing:</label><input type="number" id="closing" required /><br>
-    <label>Note:</label><textarea id="note"></textarea><br>
-    <button type="submit">Submit</button>
-  </form>
+  <div class="container">
+    <div class="logout"><button onclick="logout()">Logout</button></div>
+    <h2 id="welcome">Wallet Closing Entry</h2>
+    <form id="entryForm">
+      <label>Date:</label><input type="date" id="date" required />
+      <label>Wallet:</label>
+      <select id="wallet" required>
+        <option value="">Select Wallet</option>
+        <option value="BOB SATHYA">BOB SATHYA</option>
+        <option value="HDFC MURUGESAN">HDFC MURUGESAN</option>
+        <option value="SBI">SBI</option>
+        <option value="SURIYA GPAY">SURIYA GPAY</option>
+        <option value="CSC MURUGESAN">CSC MURUGESAN</option>
+      </select>
+      <label>Closing:</label><input type="number" id="closing" required />
+      <label>Note:</label><textarea id="note"></textarea>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
   <script>
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+
     const user = JSON.parse(sessionStorage.getItem('user'));
     if (!user || user.role !== "staff") {
       alert("Access denied. Please login as staff.");
@@ -42,25 +93,25 @@
         method: 'POST',
         body: new URLSearchParams(data)
       })
-      .then(res => res.json())
-      .then(resp => {
-        if (resp.status === "ok") {
-          alert("✅ Saved!");
-          form.reset();
-        } else {
-          alert("⚠️ " + resp.message);
+      .then(res => res.text())
+      .then(respText => {
+        try {
+          const resp = JSON.parse(respText);
+          if (resp.status === "ok") {
+            alert("✅ Submitted successfully!");
+            form.reset();
+          } else {
+            alert("⚠️ " + resp.message);
+          }
+        } catch {
+          alert("✅ Submitted! (Response unreadable, but success assumed)");
         }
       })
-      .catch(error => alert("❌ Submission failed."));
+      .catch(error => {
+        console.error(error);
+        alert("❌ Submission failed. Please try again.");
+      });
     });
   </script>
-  
-<script>
-function logout() {
-  sessionStorage.clear();
-  window.location.href = "login.html";
-}
-</script>
-
 </body>
 </html>

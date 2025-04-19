@@ -1,1 +1,83 @@
-<!DOCTYPE html><html><head><title>Login</title></head><body><h1>Login Page</h1></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - eSevai</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #2c3e50, #3498db);
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      width: 300px;
+      text-align: center;
+    }
+    input[type="text"], input[type="password"] {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="text" id="userCode" placeholder="User ID"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <input type="text" id="staffName" placeholder="Staff Name"><br>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <script>
+    const users = {
+      '1': { password: '1' },
+      '2': { password: '2' },
+      'MURUGESAN': { password: 'Muru@2025', isBoss: true }
+    };
+
+    function login() {
+      const userCode = document.getElementById('userCode').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const staffName = document.getElementById('staffName').value.trim();
+
+      if (!userCode || !password || !staffName) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const user = users[userCode.toUpperCase()];
+      if (user && user.password === password) {
+        sessionStorage.setItem("userCode", userCode);
+        sessionStorage.setItem("staffName", staffName);
+        if (user.isBoss) {
+          window.location.href = "dashboard.html";
+        } else {
+          window.location.href = "entry.html";
+        }
+      } else {
+        alert("Invalid credentials!");
+      }
+    }
+  </script>
+</body>
+</html>

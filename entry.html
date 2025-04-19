@@ -1,117 +1,104 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wallet Entry</title>
+  <title>Entry Form</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f2f2f2;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
-      margin: 0;
     }
-    .container {
+    form {
       background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #ccc;
-      width: 100%;
-      max-width: 400px;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #0044cc;
-      color: white;
-      border: none;
-      border-radius: 4px;
+      padding: 20px;
+      border-radius: 8px;
+      width: 350px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
-      margin-bottom: 20px;
     }
-    .logout {
-      text-align: right;
-      margin-bottom: 10px;
+    label, input, select, textarea {
+      width: 100%;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logout"><button onclick="logout()">Logout</button></div>
-    <h2 id="welcome">Wallet Closing Entry</h2>
-    <form id="entryForm">
-      <label>Date:</label><input type="date" id="date" required />
-      <label>Wallet:</label>
-      <select id="wallet" required>
-        <option value="">Select Wallet</option>
-        <option value="BOB SATHYA">BOB SATHYA</option>
-        <option value="HDFC MURUGESAN">HDFC MURUGESAN</option>
-        <option value="SBI">SBI</option>
-        <option value="SURIYA GPAY">SURIYA GPAY</option>
-        <option value="CSC MURUGESAN">CSC MURUGESAN</option>
-      </select>
-      <label>Closing:</label><input type="number" id="closing" required />
-      <label>Note:</label><textarea id="note"></textarea>
-      <button type="submit">Submit</button>
-    </form>
-  </div>
 
-  <script>
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = "login.html";
-    }
+<h2>Welcome, <span id="staffDisplay"></span></h2>
 
-    const user = JSON.parse(sessionStorage.getItem('user'));
-    if (!user || user.role !== "staff") {
-      alert("Access denied. Please login as staff.");
-      window.location.href = "login.html";
-    }
-    document.getElementById("welcome").innerText = "Welcome, " + sessionStorage.getItem("displayName");
+<form onsubmit="submitForm(event)">
+  <label>Date:</label>
+  <input type="date" id="date" required>
 
-    const form = document.getElementById('entryForm');
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const data = {
-        date: document.getElementById('date').value,
-        userCode: user.username,
-        staffName: sessionStorage.getItem("displayName"),
-        wallet: document.getElementById('wallet').value,
-        closing: document.getElementById('closing').value,
-        note: document.getElementById('note').value
-      };
-      fetch('https://script.google.com/macros/s/AKfycbxFlDGzVHVzJkxEdi7KOPR5wCESImWTTCNhGflsT7KkHr_T2RhT0FeP51OK_B3zjiU/exec', {
-        method: 'POST',
-        body: new URLSearchParams(data)
-      })
-      .then(res => res.text())
-      .then(respText => {
-        try {
-          const resp = JSON.parse(respText);
-          if (resp.status === "ok") {
-            alert("✅ Submitted successfully!");
-            form.reset();
-          } else {
-            alert("⚠️ " + resp.message);
-          }
-        } catch {
-          alert("✅ Submitted! (Response unreadable, but success assumed)");
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        alert("❌ Submission failed. Please try again.");
-      });
+  <label>Wallet Name:</label>
+  <select id="wallet">
+    <option value="SBI">SBI</option>
+    <option value="BOB SATHYA">BOB SATHYA</option>
+    <option value="HDFC MURUGESAN">HDFC MURUGESAN</option>
+    <option value="SURIYA GPAY">SURIYA GPAY</option>
+    <option value="CSC MURUGESAN">CSC MURUGESAN</option>
+  </select>
+
+  <label>Closing Balance:</label>
+  <input type="number" id="closing" required>
+
+  <label>Note (optional):</label>
+  <textarea id="note"></textarea>
+
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+  const sheetURL = "https://script.google.com/macros/s/AKfycbxFlDGzVHVzJkxEdi7KOPR5wCESImWTTCNhGflsT7KkHr_T2RhT0FeP51OK_B3zjiU/exec";
+
+  const staffName = sessionStorage.getItem("staffName");
+  const userCode = sessionStorage.getItem("userCode");
+  document.getElementById("staffDisplay").innerText = staffName || "Unknown";
+
+  function submitForm(e) {
+    e.preventDefault();
+    const date = document.getElementById("date").value;
+    const wallet = document.getElementById("wallet").value;
+    const closing = document.getElementById("closing").value;
+    const note = document.getElementById("note").value;
+
+    const payload = new URLSearchParams();
+    payload.append("date", date);
+    payload.append("wallet", wallet);
+    payload.append("closing", closing);
+    payload.append("note", note);
+    payload.append("userCode", userCode);
+    payload.append("staffName", staffName);
+
+    fetch(sheetURL, {
+      method: "POST",
+      body: payload
+    })
+    .then(res => res.text())
+    .then(data => {
+      alert("Submitted successfully!");
+      document.querySelector("form").reset();
+    })
+    .catch(err => {
+      alert("Submission failed!");
     });
-  </script>
+  }
+</script>
 </body>
 </html>

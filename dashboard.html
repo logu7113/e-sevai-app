@@ -37,7 +37,7 @@
       flex-wrap: wrap;
       margin-bottom: 15px;
     }
-    input {
+    input, select {
       padding: 6px;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -74,7 +74,9 @@
     <input type="date" id="fromDate">
     <input type="date" id="toDate">
     <input type="text" id="walletFilter" placeholder="Filter by Wallet">
-    <input type="text" id="staffFilter" placeholder="Filter by Staff">
+    <select id="staffDropdown">
+      <option value="">All Staff</option>
+    </select>
     <button onclick="applyFilters()">Search</button>
     <button onclick="exportExcel()">Export Excel</button>
     <button onclick="exportPDF()">Export PDF</button>
@@ -102,6 +104,7 @@ if (!user || user.role !== "boss") {
   window.location.href = "login.html";
 }
 
+let rawData = [];
 let sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pub?output=csv";
 
 function logout() {
@@ -114,8 +117,9 @@ function fetchData() {
     .then(res => res.text())
     .then(csv => {
       const rows = csv.trim().split("\n").map(r => r.split(","));
-      window.rawData = rows.slice(1); // skip header
-      renderTable(window.rawData);
+      rawData = rows.slice(1); // skip header
+      renderTable(rawData);
+      populateStaffDropdown(rawData);
     });
 }
 
@@ -140,20 +144,32 @@ function renderTable(data) {
   document.getElementById("summary").textContent = "Total Closing: ₹" + total;
 }
 
+function populateStaffDropdown(data) {
+  const select = document.getElementById("staffDropdown");
+  const names = [...new Set(data.map(r => r[5]).filter(n => n))].sort();
+  select.innerHTML = '<option value="">All Staff</option>';
+  names.forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+}
+
 function applyFilters() {
   const from = document.getElementById("fromDate").value;
   const to = document.getElementById("toDate").value;
   const wallet = document.getElementById("walletFilter").value.toLowerCase();
-  const staff = document.getElementById("staffFilter").value.toLowerCase();
+  const staff = document.getElementById("staffDropdown").value;
 
-  const filtered = window.rawData.filter(r => {
+  const filtered = rawData.filter(r => {
     const rDate = r[0];
     const rWallet = r[1].toLowerCase();
-    const rStaff = r[5].toLowerCase();
+    const rStaff = r[5];
     return (!from || rDate >= from) &&
            (!to || rDate <= to) &&
            rWallet.includes(wallet) &&
-           rStaff.includes(staff);
+           (!staff || rStaff === staff);
   });
   renderTable(filtered);
 }

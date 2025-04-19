@@ -2,193 +2,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Boss Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>Boss Dashboard - eSevai</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f2f5;
-      padding: 30px;
-      margin: 0;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
+      padding: 20px;
     }
     h2 {
-      margin: 0;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
     }
     button {
       background: #007bff;
       color: white;
       border: none;
-      padding: 8px 16px;
-      cursor: pointer;
       border-radius: 4px;
-      margin-left: 5px;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-    }
-    input, select {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      padding: 8px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-    th {
-      background: #343a40;
-      color: white;
-    }
-    #summary {
-      margin: 10px 0;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h2>Boss Dashboard</h2>
-    <div>
-      <button onclick="refreshData()">🔁 Refresh</button>
-      <button onclick="logout()">Logout</button>
+  <div class="container">
+    <h2>👨‍💼 Boss Dashboard</h2>
+    <button onclick="logout()" style="float:right;">Logout</button>
+
+    <div class="card">
+      <h3>Create New Staff User</h3>
+      <input type="text" id="newUser" placeholder="Staff ID (e.g. 011)">
+      <input type="password" id="newPass" placeholder="Password">
+      <button onclick="createStaff()">Create Staff</button>
+    </div>
+
+    <div class="card">
+      <h3>Update Boss Credentials</h3>
+      <input type="text" id="bossUser" placeholder="New Boss Username">
+      <input type="password" id="bossPass" placeholder="New Boss Password">
+      <button onclick="updateBoss()">Update Boss</button>
     </div>
   </div>
-  <div class="filters">
-    <input type="date" id="fromDate">
-    <input type="date" id="toDate">
-    <input type="text" id="walletFilter" placeholder="Filter by Wallet">
-    <select id="staffDropdown">
-      <option value="">All Staff</option>
-    </select>
-    <button onclick="applyFilters()">Search</button>
-    <button onclick="exportExcel()">Export Excel</button>
-    <button onclick="exportPDF()">Export PDF</button>
-  </div>
-  <div id="summary"></div>
-  <table id="entryTable">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Wallet</th>
-        <th>Closing</th>
-        <th>Note</th>
-        <th>User Code</th>
-        <th>Staff Name</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-    </tbody>
-  </table>
 
-<script>
-const user = JSON.parse(sessionStorage.getItem('user'));
-if (!user || user.role !== "boss") {
-  alert("Access denied. Boss only.");
-  window.location.href = "login.html";
-}
+  <script>
+    const bossSheetURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"; // replace with your Apps Script
 
-let rawData = [];
-let sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pub?output=csv";
+    function logout() {
+      sessionStorage.clear();
+      location.href = "login.html";
+    }
 
-function logout() {
-  sessionStorage.removeItem("user");
-  window.location.href = "login.html";
-}
+    function createStaff() {
+      const id = document.getElementById("newUser").value;
+      const pass = document.getElementById("newPass").value;
+      if (!id || !pass) return alert("Enter staff ID and password");
 
-function fetchData() {
-  fetch(sheetURL + '&cache=' + new Date().getTime())
-    .then(res => res.text())
-    .then(csv => {
-      const rows = csv.trim().split("\n").map(r => r.split(","));
-      rawData = rows.slice(1); // skip header
-      renderTable(rawData);
-      populateStaffDropdown(rawData);
-    });
-}
+      fetch(bossSheetURL, {
+        method: "POST",
+        body: new URLSearchParams({ action: "createStaff", id, pass })
+      }).then(r => r.text()).then(resp => {
+        alert("✅ Staff Created");
+        document.getElementById("newUser").value = "";
+        document.getElementById("newPass").value = "";
+      });
+    }
 
-function refreshData() {
-  fetchData();
-}
+    function updateBoss() {
+      const u = document.getElementById("bossUser").value;
+      const p = document.getElementById("bossPass").value;
+      if (!u || !p) return alert("Enter boss credentials");
 
-function renderTable(data) {
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
-  let total = 0;
-  data.forEach(r => {
-    const tr = document.createElement("tr");
-    r.forEach(col => {
-      const td = document.createElement("td");
-      td.textContent = col;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-    total += Number(r[2]) || 0;
-  });
-  document.getElementById("summary").textContent = "Total Closing: ₹" + total;
-}
-
-function populateStaffDropdown(data) {
-  const select = document.getElementById("staffDropdown");
-  const names = [...new Set(data.map(r => r[5]).filter(n => n))].sort();
-  select.innerHTML = '<option value="">All Staff</option>';
-  names.forEach(name => {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    select.appendChild(option);
-  });
-}
-
-function applyFilters() {
-  const from = document.getElementById("fromDate").value;
-  const to = document.getElementById("toDate").value;
-  const wallet = document.getElementById("walletFilter").value.toLowerCase();
-  const staff = document.getElementById("staffDropdown").value;
-
-  const filtered = rawData.filter(r => {
-    const rDate = r[0];
-    const rWallet = r[1].toLowerCase();
-    const rStaff = r[5];
-    return (!from || rDate >= from) &&
-           (!to || rDate <= to) &&
-           rWallet.includes(wallet) &&
-           (!staff || rStaff === staff);
-  });
-  renderTable(filtered);
-}
-
-function exportExcel() {
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.table_to_sheet(document.getElementById("entryTable"));
-  XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
-  XLSX.writeFile(wb, "dashboard.xlsx");
-}
-
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.autoTable({ html: '#entryTable' });
-  doc.save("dashboard.pdf");
-}
-
-fetchData();
-</script>
+      fetch(bossSheetURL, {
+        method: "POST",
+        body: new URLSearchParams({ action: "updateBoss", user: u, pass: p })
+      }).then(r => r.text()).then(resp => {
+        alert("✅ Boss credentials updated");
+      });
+    }
+  </script>
 </body>
 </html>

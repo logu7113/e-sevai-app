@@ -1,81 +1,66 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Login - eSevai</title>
+  <title>e-Sevai Login</title>
   <style>
     body {
-      background: linear-gradient(to right, #2c3e50, #3498db);
+      margin: 0;
+      padding: 0;
+      background-image: url('https://images.unsplash.com/photo-1532619066897-79d6d5d93b93?auto=format&fit=crop&w=1470&q=80');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
       font-family: Arial, sans-serif;
       display: flex;
-      align-items: center;
       justify-content: center;
-      height: 100vh;
-      margin: 0;
+      align-items: center;
     }
-    .login-box {
-      background: white;
+    .login-container {
+      background-color: rgba(255,255,255,0.95);
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      width: 300px;
+      box-shadow: 0 0 10px #333;
+      width: 350px;
       text-align: center;
     }
-    input[type="text"], input[type="password"] {
+    input {
       width: 90%;
       padding: 10px;
       margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
     }
     button {
       padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
+      background: #007bff;
       border: none;
+      color: white;
       border-radius: 5px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2>Login</h2>
-    <input type="text" id="userCode" placeholder="User ID"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <input type="text" id="staffName" placeholder="Staff Name"><br>
+  <div class="login-container">
+    <h2>🛡️ Boss Login</h2>
+    <input type="text" id="user" placeholder="Username"><br>
+    <input type="password" id="pass" placeholder="Password"><br>
     <button onclick="login()">Login</button>
   </div>
 
   <script>
-    const users = {
-      '1': { password: '1' },
-      '2': { password: '2' },
-      'MURUGESAN': { password: 'Muru@2025', isBoss: true }
-    };
-
     function login() {
-      const userCode = document.getElementById('userCode').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const staffName = document.getElementById('staffName').value.trim();
-
-      if (!userCode || !password || !staffName) {
-        alert("Please fill all fields.");
+      const u = document.getElementById("user").value;
+      const p = document.getElementById("pass").value;
+      if (!u || !p) {
+        alert("Enter all fields");
         return;
       }
-
-      const user = users[userCode.toUpperCase()];
-      if (user && user.password === password) {
-        sessionStorage.setItem("userCode", userCode);
-        sessionStorage.setItem("staffName", staffName);
-        if (user.isBoss) {
-          window.location.href = "dashboard.html";
-        } else {
-          window.location.href = "entry.html";
-        }
+      // Replace below with Google Sheet check (if needed)
+      if (u === "Murugesan" && p === "Muru@2025") {
+        sessionStorage.setItem("user", JSON.stringify({role: "boss", username: u}));
+        window.location.href = "dashboard.html";
       } else {
-        alert("Invalid credentials!");
+        alert("Invalid credentials");
       }
     }
   </script>

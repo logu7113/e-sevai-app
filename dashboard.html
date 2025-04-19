@@ -1,54 +1,144 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>Boss Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
-      background: #f4f4f4;
-      margin: 0;
+      background: #f8f9fa;
       padding: 20px;
     }
-    .top-bar {
+    h2 {
+      text-align: center;
+    }
+    .filter-group {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      justify-content: center;
+    }
+    .filter-group input, .filter-group select {
+      padding: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background: #343a40;
+      color: white;
     }
     button {
+      margin-top: 10px;
       padding: 8px 16px;
-      background-color: #d9534f;
+      background-color: #007bff;
       border: none;
       color: white;
       border-radius: 4px;
       cursor: pointer;
     }
-    iframe {
-      width: 100%;
-      height: 600px;
-      border: 1px solid #ccc;
-      margin-top: 20px;
+    #summary {
+      margin-top: 15px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <h2>Boss Dashboard</h2>
-    <button onclick="logout()">Logout</button>
+  <h2>Boss Dashboard</h2>
+  <div class="filter-group">
+    <input type="text" id="dateFilter" placeholder="Filter by Date (yyyy-mm-dd)">
+    <input type="text" id="walletFilter" placeholder="Filter by Wallet">
+    <input type="text" id="staffFilter" placeholder="Filter by Staff">
+    <button onclick="exportTable()">Export</button>
   </div>
+  <div id="summary"></div>
+  <table id="entryTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Wallet</th>
+        <th>Closing</th>
+        <th>Note</th>
+        <th>User Code</th>
+        <th>Staff Name</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+    </tbody>
+  </table>
 
-  <script>
-    const user = JSON.parse(sessionStorage.getItem('user'));
-    if (!user || user.role !== "boss") {
-      alert("Access denied. Boss only.");
-      window.location.href = "login.html";
-    }
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = "login.html";
-    }
-  </script>
+<script>
+const user = JSON.parse(sessionStorage.getItem('user'));
+if (!user || user.role !== "boss") {
+  alert("Access denied. Boss only.");
+  window.location.href = "login.html";
+}
 
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pubhtml?widget=true&amp;headers=false"></iframe>
+let sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pub?output=csv";
+
+function fetchData() {
+  fetch(sheetURL)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.trim().split("\n").map(r => r.split(","));
+      const headers = rows[0];
+      const data = rows.slice(1);
+      window.rawData = data;
+      renderTable(data);
+    });
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+  let total = 0;
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+    row.forEach(col => {
+      const td = document.createElement("td");
+      td.textContent = col;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+    total += Number(row[2]) || 0;
+  });
+  document.getElementById("summary").textContent = "Total Closing: ₹" + total;
+}
+
+function applyFilters() {
+  const date = document.getElementById("dateFilter").value.toLowerCase();
+  const wallet = document.getElementById("walletFilter").value.toLowerCase();
+  const staff = document.getElementById("staffFilter").value.toLowerCase();
+
+  const filtered = window.rawData.filter(r =>
+    r[0].toLowerCase().includes(date) &&
+    r[1].toLowerCase().includes(wallet) &&
+    r[5].toLowerCase().includes(staff)
+  );
+  renderTable(filtered);
+}
+
+["dateFilter", "walletFilter", "staffFilter"].forEach(id =>
+  document.getElementById(id).addEventListener("input", applyFilters)
+);
+
+function exportTable() {
+  let wb = XLSX.utils.book_new();
+  let ws = XLSX.utils.table_to_sheet(document.getElementById("entryTable"));
+  XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+  XLSX.writeFile(wb, "dashboard_export.xlsx");
+}
+
+fetchData();
+</script>
 </body>
 </html>

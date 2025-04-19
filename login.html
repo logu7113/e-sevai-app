@@ -1,80 +1,27 @@
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Prakalya NETZONE</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to right, #74ebd5, #acb6e5);
-      height: 100vh;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .container {
-      width: 100%;
-      max-width: 360px;
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.15);
-      text-align: center;
-    }
-    .brand {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #0047ab;
-      margin-bottom: 1.5rem;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 0.5rem 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #0047ab;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #002f6c;
-    }
-  </style>
-</head>
+<html>
+<head><title>Login</title></head>
 <body>
-  <div class="container">
-    <div class="brand">PRAKALYA NETZONE</div>
-    <input type="text" id="user" placeholder="User ID" />
-    <input type="password" id="pass" placeholder="Password" />
-    <button onclick="login()">Login</button>
-  </div>
-
+  <h2>e-Sevai Staff Login</h2>
+  <form onsubmit="event.preventDefault(); login();">
+    <input type="text" id="code" placeholder="User Code (e.g. 001)" required><br>
+    <input type="password" id="pass" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+  </form>
   <script>
     function login() {
-      const user = document.getElementById("user").value.trim();
-      const pass = document.getElementById("pass").value.trim();
-      if (!user || !pass) {
-        alert("Please enter both User ID and Password.");
-        return;
-      }
-      if (user === "Murugesan" && pass === "Muru@2025") {
-        sessionStorage.setItem("user", JSON.stringify({role: "boss", username: user}));
+      const c = document.getElementById("code").value;
+      const p = document.getElementById("pass").value;
+      if (c === "Murugesan" && p === "Muru@2025") {
+        sessionStorage.setItem("user", JSON.stringify({username: "BOSS", role: "boss"}));
+        sessionStorage.setItem("displayName", "Murugesan");
         window.location.href = "dashboard.html";
-      } else {
-        sessionStorage.setItem("user", JSON.stringify({role: "staff", username: user}));
+      } else if (c >= "001" && c <= "010" && p === c) {
+        sessionStorage.setItem("user", JSON.stringify({username: c, role: "staff"}));
+        sessionStorage.setItem("displayName", "Staff " + c);
         window.location.href = "entry.html";
+      } else {
+        alert("Invalid credentials");
       }
     }
   </script>

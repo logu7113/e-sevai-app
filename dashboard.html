@@ -65,7 +65,10 @@
 <body>
   <div class="header">
     <h2>Boss Dashboard</h2>
-    <button onclick="logout()">Logout</button>
+    <div>
+      <button onclick="refreshData()">🔁 Refresh</button>
+      <button onclick="logout()">Logout</button>
+    </div>
   </div>
   <div class="filters">
     <input type="date" id="fromDate">
@@ -107,13 +110,17 @@ function logout() {
 }
 
 function fetchData() {
-  fetch(sheetURL)
+  fetch(sheetURL + '&cache=' + new Date().getTime())
     .then(res => res.text())
     .then(csv => {
       const rows = csv.trim().split("\n").map(r => r.split(","));
       window.rawData = rows.slice(1); // skip header
       renderTable(window.rawData);
     });
+}
+
+function refreshData() {
+  fetchData();
 }
 
 function renderTable(data) {

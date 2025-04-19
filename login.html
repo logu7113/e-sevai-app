@@ -4,73 +4,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>e-Sevai Staff Login</title>
+  <title>Login - Prakalya NETZONE</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #0066cc, #00ccff);
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
       height: 100vh;
+      font-family: Arial, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: Arial, sans-serif;
     }
-    .login-container {
-      background: #fff;
+    .container {
+      width: 100%;
+      max-width: 360px;
+      background: white;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
       text-align: center;
-      width: 300px;
     }
-    h2 {
+    .brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0047ab;
       margin-bottom: 1.5rem;
-      color: #0066cc;
     }
     input {
       width: 100%;
       padding: 10px;
-      margin: 8px 0;
+      margin: 0.5rem 0;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
     }
     button {
       width: 100%;
       padding: 10px;
-      background: #0066cc;
-      color: #fff;
-      font-size: 1rem;
+      background: #0047ab;
+      color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
     }
     button:hover {
-      background: #004999;
+      background: #002f6c;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>e-Sevai Staff Login</h2>
-    <input type="text" id="userid" placeholder="User ID (e.g. 005)" />
-    <input type="password" id="password" placeholder="Password" />
+  <div class="container">
+    <div class="brand">PRAKALYA NETZONE</div>
+    <input type="text" id="user" placeholder="User ID" />
+    <input type="password" id="pass" placeholder="Password" />
     <button onclick="login()">Login</button>
   </div>
 
   <script>
     function login() {
-      const userid = document.getElementById('userid').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if (!userid || !password) {
+      const user = document.getElementById("user").value.trim();
+      const pass = document.getElementById("pass").value.trim();
+      if (!user || !pass) {
         alert("Please enter both User ID and Password.");
         return;
       }
-      localStorage.setItem("userCode", userid);
-      localStorage.setItem("userPassword", password);
-      window.location.href = "entry.html"; // redirect to entry
+      if (user === "Murugesan" && pass === "Muru@2025") {
+        sessionStorage.setItem("user", JSON.stringify({role: "boss", username: user}));
+        window.location.href = "dashboard.html";
+      } else {
+        sessionStorage.setItem("user", JSON.stringify({role: "staff", username: user}));
+        window.location.href = "entry.html";
+      }
     }
   </script>
 </body>

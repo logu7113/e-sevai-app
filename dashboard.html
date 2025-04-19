@@ -1,9 +1,139 @@
 
 <!DOCTYPE html>
-<html>
-<head><title>Boss Dashboard</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Boss Dashboard - PRAKALYA NETZONE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #004aad;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .filters, .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      cursor: pointer;
+      background-color: #004aad;
+      color: white;
+      border: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #e0e0e0;
+    }
+    .staff-list {
+      margin-top: 30px;
+    }
+  </style>
+</head>
 <body>
-  <h2 style="text-align:center; color:#004aad;">PRAKALYA NETZONE</h2>
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7SXNYMH1KRktOzRjozzYP33gBNypj77Jj4ZfRK1yObv5W048hJVhnxsnfRaNGNzKdLM0OdOYMJ4u9/pubhtml?widget=true&amp;headers=false" width="100%" height="600"></iframe>
+  <header>PRAKALYA NETZONE</header>
+  <div class="container">
+    <div class="filters">
+      <label>From: <input type="date" id="fromDate"></label>
+      <label>To: <input type="date" id="toDate"></label>
+      <label>Wallet:
+        <select id="walletFilter">
+          <option value="">All</option>
+          <option>SBI</option>
+          <option>BOB SATHYA</option>
+          <option>HDFC MURUGESAN</option>
+          <option>SURIYA GPAY</option>
+          <option>CSC MURUGESAN</option>
+        </select>
+      </label>
+      <label>Staff:
+        <select id="staffFilter">
+          <option value="">All</option>
+        </select>
+      </label>
+    </div>
+    <div class="actions">
+      <button onclick="refreshTable()">🔁 Refresh</button>
+      <button onclick="exportToExcel()">📤 Export Excel</button>
+      <button onclick="exportToPDF()">📤 Export PDF</button>
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
+    <table id="dataTable">
+      <thead>
+        <tr><th>Date</th><th>Wallet</th><th>Staff</th><th>Closing</th><th>Note</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="staff-list">
+      <h3>✅ Existing Staff List</h3>
+      <ul id="staffList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const staffList = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"];
+    const tableBody = document.querySelector("#dataTable tbody");
+    const staffDropdown = document.getElementById("staffFilter");
+    const staffListEl = document.getElementById("staffList");
+
+    function populateStaffFilters() {
+      staffDropdown.innerHTML = '<option value="">All</option>';
+      staffList.forEach(staff => {
+        staffDropdown.innerHTML += `<option>${staff}</option>`;
+        staffListEl.innerHTML += `<li>${staff}</li>`;
+      });
+    }
+
+    function refreshTable() {
+      tableBody.innerHTML = "<tr><td colspan='5'>🔄 Sample row loaded (connect Google Sheet backend here)</td></tr>";
+    }
+
+    function exportToExcel() {
+      alert("🔧 Export to Excel feature to be implemented with SheetJS or server function.");
+    }
+
+    function exportToPDF() {
+      alert("🔧 Export to PDF feature to be implemented with jsPDF or server function.");
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      location.href = "login.html";
+    }
+
+    populateStaffFilters();
+  </script>
 </body>
 </html>

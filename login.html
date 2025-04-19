@@ -1,81 +1,27 @@
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Login - eSevai</title>
-  <style>
-    body {
-      background: linear-gradient(to right, #2c3e50, #3498db);
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .login-box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      width: 300px;
-      text-align: center;
-    }
-    input[type="text"], input[type="password"] {
-      width: 90%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
-</head>
+<html>
+<head><title>Login</title></head>
 <body>
-  <div class="login-box">
-    <h2>Login</h2>
-    <input type="text" id="userCode" placeholder="User ID"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <input type="text" id="staffName" placeholder="Staff Name"><br>
-    <button onclick="login()">Login</button>
-  </div>
-
+  <h2>e-Sevai Staff Login</h2>
+  <form onsubmit="event.preventDefault(); login();">
+    <input type="text" id="code" placeholder="User Code (e.g. 001)" required><br>
+    <input type="password" id="pass" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+  </form>
   <script>
-    const users = {
-      '1': { password: '1' },
-      '2': { password: '2' },
-      'MURUGESAN': { password: 'Muru@2025', isBoss: true }
-    };
-
     function login() {
-      const userCode = document.getElementById('userCode').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const staffName = document.getElementById('staffName').value.trim();
-
-      if (!userCode || !password || !staffName) {
-        alert("Please fill all fields.");
-        return;
-      }
-
-      const user = users[userCode.toUpperCase()];
-      if (user && user.password === password) {
-        sessionStorage.setItem("userCode", userCode);
-        sessionStorage.setItem("staffName", staffName);
-        if (user.isBoss) {
-          window.location.href = "dashboard.html";
-        } else {
-          window.location.href = "entry.html";
-        }
+      const c = document.getElementById("code").value;
+      const p = document.getElementById("pass").value;
+      if (c === "Murugesan" && p === "Muru@2025") {
+        sessionStorage.setItem("user", JSON.stringify({username: "BOSS", role: "boss"}));
+        sessionStorage.setItem("displayName", "Murugesan");
+        window.location.href = "dashboard.html";
+      } else if (c >= "001" && c <= "010" && p === c) {
+        sessionStorage.setItem("user", JSON.stringify({username: c, role: "staff"}));
+        sessionStorage.setItem("displayName", "Staff " + c);
+        window.location.href = "entry.html";
       } else {
-        alert("Invalid credentials!");
+        alert("Invalid credentials");
       }
     }
   </script>

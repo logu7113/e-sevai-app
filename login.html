@@ -1,1 +1,81 @@
-<!-- login.html placeholder content -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>e-Sevai Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #3c8dbc, #1e282c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+    .login-box {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #333;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #3c8dbc;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>🔐 e-Sevai Login</h2>
+    <form onsubmit="event.preventDefault(); login();">
+      <input type="text" id="code" placeholder="User Code (e.g. 001 or Murugesan)" required>
+      <input type="password" id="pass" placeholder="Password" required>
+      <input type="text" id="staffname" placeholder="Your Name (Staff only)">
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    function login() {
+      const c = document.getElementById("code").value;
+      const p = document.getElementById("pass").value;
+      const n = document.getElementById("staffname").value || "Unnamed";
+
+      if (c === "Murugesan" && p === "Muru@2025") {
+        sessionStorage.setItem("user", JSON.stringify({username: "MD", role: "boss"}));
+        sessionStorage.setItem("displayName", "Murugesan");
+        window.location.href = "dashboard.html";
+      } else if (c >= "001" && c <= "010" && p === c) {
+        sessionStorage.setItem("user", JSON.stringify({username: c, role: "staff"}));
+        sessionStorage.setItem("displayName", n);
+        window.location.href = "entry.html";
+      } else {
+        alert("Invalid credentials");
+      }
+    }
+  </script>
+</body>
+</html>

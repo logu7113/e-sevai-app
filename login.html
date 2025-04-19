@@ -1,28 +1,76 @@
+
 <!DOCTYPE html>
-<html>
-<head><title>Login</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>e-Sevai Staff Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0066cc, #00ccff);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+    }
+    .login-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      width: 300px;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #0066cc;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #0066cc;
+      color: #fff;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #004999;
+    }
+  </style>
+</head>
 <body>
-  <h2>e-Sevai Staff Login</h2>
-  <form onsubmit="event.preventDefault(); login();">
-    <input type="text" id="code" placeholder="User Code (e.g. 001)" required><br>
-    <input type="password" id="pass" placeholder="Password" required><br>
-    <button type="submit">Login</button>
-  </form>
+  <div class="login-container">
+    <h2>e-Sevai Staff Login</h2>
+    <input type="text" id="userid" placeholder="User ID (e.g. 005)" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+  </div>
+
   <script>
     function login() {
-      const c = document.getElementById("code").value;
-      const p = document.getElementById("pass").value;
-      if (c === "Murugesan" && p === "Muru@2025") {
-        sessionStorage.setItem("user", JSON.stringify({username: "BOSS", role: "boss"}));
-        sessionStorage.setItem("displayName", "Murugesan");
-        window.location.href = "dashboard.html";
-      } else if (c >= "001" && c <= "010" && p === c) {
-        sessionStorage.setItem("user", JSON.stringify({username: c, role: "staff"}));
-        sessionStorage.setItem("displayName", "Staff " + c);
-        window.location.href = "entry.html";
-      } else {
-        alert("Invalid credentials");
+      const userid = document.getElementById('userid').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!userid || !password) {
+        alert("Please enter both User ID and Password.");
+        return;
       }
+      localStorage.setItem("userCode", userid);
+      localStorage.setItem("userPassword", password);
+      window.location.href = "entry.html"; // redirect to entry
     }
   </script>
 </body>
